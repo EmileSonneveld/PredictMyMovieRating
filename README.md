@@ -29,6 +29,7 @@ Feature 0 is the IMDB score, feature 1 is the movie length and feature 3 is the 
 
 Many of the trained decision trees took the IMDB score as the most important parameter.
 Even a small decision tree overfits on the data. I got better results when training only using the IMDB score without the other categories. Shown in the following image:
+
 ![](bootstrap-estimators.png)
 
 Further steps
