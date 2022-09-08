@@ -161,7 +161,9 @@ object SparkRatingPrediction extends App {
   moviesVectorizedDF = moviesVectorizedDF.select("Const", "label", "features")
   println("moviesVectorizedDF.count: " + moviesVectorizedDF.count)
 
-  (1 to 10) foreach { _ => // Do some manual bootstraping to tweak hyper params
+  val bootstrapBuckets = 1
+  //val bootstrapBuckets = 100 // Uncomment to see how stable the estimators get trained.
+  (1 to bootstrapBuckets) foreach { _ =>
     // randomSplit can cause problems in spark 3.0.0-preview around 'nanSafeCompareDoubles'
     val Array(trainingDF, testDF) = moviesVectorizedDF.randomSplit(Array(0.7, 0.3)) // , seed = 1234
     println("trainingDF.count: " + trainingDF.count)
@@ -169,7 +171,7 @@ object SparkRatingPrediction extends App {
     val ratingClassifier = new DecisionTreeClassifier()
       .setImpurity("gini")
       .setMaxDepth(2)
-      .setMaxBins(8)
+      .setMaxBins(20)
 
     // ratingClassifier will use columns 'label' and 'features' by default
     //    val ratingClassifier = new LogisticRegression()
@@ -205,7 +207,6 @@ object SparkRatingPrediction extends App {
     println("precision: " + precision)
     println("recall: " + recall)
     println("f1Score: " + f1Score)
-
 
     val resultDF = predictDF.select("label", "prediction")
     val scoreAndLabels = resultDF.rdd.map(x => (x(0).asInstanceOf[Double], x(1).asInstanceOf[Double]))
